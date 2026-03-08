@@ -1,0 +1,142 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:LinkSentry.ViewModels"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="750"
+        Width="1200" Height="750"
+        WindowStartupLocation="CenterOwner"
+        x:Class="LinkSentry.Views.DetailWindow"
+        x:DataType="vm:DetailViewModel"
+        Title="{Binding NetworkInterface.Name, StringFormat='NetPulse - {0}'}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" Margin="20">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="5" Margin="0,0,0,15">
+            <TextBlock Text="{Binding NetworkInterface.Name}" FontSize="24" FontWeight="Bold" />
+            <TextBlock Text="{Binding NetworkInterface.Description}" FontSize="14" Foreground="Gray" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Main Content: Left-Right Layout -->
+        <Grid Grid.Row="1" ColumnDefinitions="420,*" Margin="0,0,0,15">
+            
+            <!-- Left: Info Panel -->
+            <ScrollViewer Grid.Column="0" Margin="0,0,15,0">
+                <StackPanel Spacing="15">
+                    <!-- Status Info -->
+                    <TextBlock Text="接口信息" FontSize="16" FontWeight="SemiBold" />
+                    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4" Padding="10" BoxShadow="0 2 4 0 #20000000">
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ShowGridLines="False">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="接口状态:" Foreground="Gray" Margin="0,0,10,3"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding NetworkInterface.DisplayStatus}" FontWeight="Bold" Foreground="{Binding NetworkInterface.StatusColor}" />
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="接口类型:" Foreground="Gray" Margin="0,0,10,3"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding NetworkInterface.NetworkInterfaceType}" />
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="物理地址:" Foreground="Gray" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding NetworkInterface.MacAddress}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- IP Addresses -->
+                    <TextBlock Text="IP 地址配置" FontSize="16" FontWeight="SemiBold" />
+                    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4" Padding="10" BoxShadow="0 2 4 0 #20000000">
+                        <Grid RowDefinitions="Auto,Auto">
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5" Spacing="5">
+                            <TextBlock Text="IPv4: " Foreground="Gray" Width="60"/>
+                            <TextBlock Text="{Binding NetworkInterface.Ipv4Address}" VerticalAlignment="Center" />
+                            <Button Content="📋" Command="{Binding NetworkInterface.CopyIpv4Command}" 
+                                    FontSize="10" Padding="4,1" MinWidth="0" MinHeight="0"
+                                    VerticalAlignment="Center" ToolTip.Tip="复制 IPv4 地址"
+                                    Background="Transparent" BorderThickness="0" Cursor="Hand" />
+                            <Border IsVisible="{Binding NetworkInterface.CopySuccess}" Background="#2000C853" CornerRadius="3" Padding="4,1">
+                                <TextBlock Text="✓ 已复制" FontSize="10" Foreground="#00C853" VerticalAlignment="Center" />
+                            </Border>
+                        </StackPanel>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                <TextBlock Text="IPv6: " Foreground="Gray" Width="60"/>
+                                <TextBlock Text="{Binding NetworkInterface.Ipv6Address}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Gateway & DHCP -->
+                    <TextBlock Text="网关与 DHCP" FontSize="16" FontWeight="SemiBold" />
+                    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4" Padding="10" BoxShadow="0 2 4 0 #20000000">
+                        <StackPanel Spacing="5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="DHCP 已启用: " Foreground="Gray" />
+                                <TextBlock Text="{Binding NetworkInterface.IsDhcpEnabled}" />
+                            </StackPanel>
+                            <TextBlock Text="默认网关:" Foreground="Gray" Margin="0,5,0,0"/>
+                            <ItemsControl ItemsSource="{Binding NetworkInterface.GatewayAddresses}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Margin="20,0,0,0" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock IsVisible="{Binding !NetworkInterface.GatewayAddresses.Count}" Text="无" Margin="20,0,0,0" Foreground="Gray" FontStyle="Italic" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- DNS -->
+                    <TextBlock Text="DNS 服务器" FontSize="16" FontWeight="SemiBold" />
+                    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4" Padding="10" BoxShadow="0 2 4 0 #20000000">
+                        <StackPanel Spacing="5">
+                            <ItemsControl ItemsSource="{Binding NetworkInterface.DnsAddresses}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" Margin="10,0,0,0" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock IsVisible="{Binding !NetworkInterface.DnsAddresses.Count}" Text="无" Margin="10,0,0,0" Foreground="Gray" FontStyle="Italic" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Right: Chart Panel -->
+            <Border Grid.Column="1" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="8" Padding="15" BoxShadow="0 2 6 0 #30000000">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <TextBlock Grid.Row="0" Text="实时流量监控" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10" />
+                    
+                    <!-- Speed display -->
+                    <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,0,0,10">
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <TextBlock Text="↑ 上传速度" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding NetworkInterface.SendSpeedKbps, StringFormat={}{0:F2} Kbps}" FontSize="20" FontWeight="Bold" Foreground="LimeGreen" HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <TextBlock Text="↓ 下载速度" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding NetworkInterface.ReceiveSpeedKbps, StringFormat={}{0:F2} Kbps}" FontSize="20" FontWeight="Bold" Foreground="DodgerBlue" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Chart -->
+                    <lvc:CartesianChart
+                        Grid.Row="2"
+                        Series="{Binding NetworkInterface.TrafficSeries}"
+                        XAxes="{Binding NetworkInterface.XAxes}"
+                        YAxes="{Binding NetworkInterface.YAxes}"
+                        TooltipPosition="Top">
+                    </lvc:CartesianChart>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Actions -->
+        <StackPanel Grid.Row="2" Spacing="10">
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" HorizontalAlignment="Stretch" Margin="0,0,0,10" />
+            <TextBlock Text="快捷操作 (部分功能可能需要管理员权限)" FontSize="14" Foreground="Gray" Margin="0,0,0,5" />
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="启用网卡" Command="{Binding EnableInterfaceCommand}" Margin="5" Width="120" HorizontalContentAlignment="Center" />
+                <Button Content="禁用网卡" Command="{Binding DisableInterfaceCommand}" Margin="5" Width="120" HorizontalContentAlignment="Center" Classes="danger" />
+                <Button Content="更新 DHCP" Command="{Binding RefreshDhcpCommand}" Margin="5" Width="120" HorizontalContentAlignment="Center" />
+                <Button Content="刷新 DNS 缓存" Command="{Binding FlushDnsCommand}" Margin="5" Width="120" HorizontalContentAlignment="Center" />
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</Window>
