@@ -1,0 +1,195 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:LinkSentry.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="700"
+             x:Class="LinkSentry.Views.SecurityView"
+             x:DataType="vm:SecurityViewModel">
+
+    <Grid RowDefinitions="*,40">
+        <TabControl Grid.Row="0" Margin="10,10,10,0">
+            <!-- ================================ -->
+            <!--  Tab 1: Firewall Overview        -->
+            <!-- ================================ -->
+            <TabItem Header="🛡️ 防火墙概览">
+                <ScrollViewer Padding="10">
+                    <StackPanel Spacing="20">
+                        <!-- Overall Status -->
+                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                                CornerRadius="8" Padding="20" BoxShadow="0 2 6 0 #30000000">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="15">
+                                    <TextBlock Text="🛡️" FontSize="32" VerticalAlignment="Center" />
+                                    <StackPanel>
+                                        <TextBlock Text="Windows Defender 防火墙" FontSize="20" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding FirewallOverallStatus}" 
+                                                   FontSize="16" FontWeight="SemiBold"
+                                                   Foreground="{Binding FirewallOverallColor}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <Button Content="🔄 刷新状态" Command="{Binding RefreshFirewallCommand}" 
+                                        HorizontalAlignment="Left" Margin="0,5,0,0"/>
+                                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsFirewallLoading}" 
+                                              HorizontalAlignment="Stretch" Height="3" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Profile Cards -->
+                        <ItemsControl ItemsSource="{Binding FirewallProfiles}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                                            CornerRadius="8" Padding="20" Margin="0,0,15,15" Width="260"
+                                            BoxShadow="0 2 4 0 #20000000">
+                                        <StackPanel Spacing="10">
+                                            <!-- Profile Name + Status Indicator -->
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="{Binding DisplayName}" 
+                                                           FontSize="18" FontWeight="SemiBold" />
+                                                <Border Grid.Column="1" CornerRadius="10" Width="20" Height="20"
+                                                        Background="{Binding StatusColor}" />
+                                            </Grid>
+
+                                            <Separator />
+
+                                            <!-- Status -->
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="状态:" Foreground="Gray" />
+                                                <TextBlock Text="{Binding StatusText}" FontWeight="Bold" 
+                                                           Foreground="{Binding StatusColor}" />
+                                            </StackPanel>
+
+                                            <!-- Inbound -->
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="入站规则:" Foreground="Gray" />
+                                                <TextBlock Text="{Binding InboundAction}" FontWeight="Medium" />
+                                            </StackPanel>
+
+                                            <!-- Outbound -->
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="出站规则:" Foreground="Gray" />
+                                                <TextBlock Text="{Binding OutboundAction}" FontWeight="Medium" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ================================ -->
+            <!--  Tab 2: Port Monitor             -->
+            <!-- ================================ -->
+            <TabItem Header="🔌 端口监控">
+                <Grid RowDefinitions="Auto,*,Auto" Margin="10">
+                    <!-- Top: Filters -->
+                    <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                            CornerRadius="8" Padding="15" Margin="0,0,0,15" BoxShadow="0 2 4 0 #20000000">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                <!-- Search -->
+                                <TextBox Grid.Column="0" Watermark="🔍 搜索 IP、端口、进程名..." 
+                                         Text="{Binding SearchText}" Margin="0,0,10,0" />
+                                
+                                <!-- Protocol filter -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" Margin="0,0,10,0">
+                                    <TextBlock Text="协议:" VerticalAlignment="Center" Foreground="Gray" />
+                                    <ComboBox ItemsSource="{Binding ProtocolOptions}" 
+                                              SelectedItem="{Binding SelectedProtocol}" Width="90" />
+                                </StackPanel>
+
+                                <!-- State filter -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" Margin="0,0,10,0">
+                                    <TextBlock Text="状态:" VerticalAlignment="Center" Foreground="Gray" />
+                                    <ComboBox ItemsSource="{Binding StateOptions}" 
+                                              SelectedItem="{Binding SelectedState}" Width="120" />
+                                </StackPanel>
+
+                                <!-- Refresh -->
+                                <Button Grid.Column="3" Content="🔄 刷新" Command="{Binding RefreshPortsCommand}" 
+                                        VerticalAlignment="Center" />
+                            </Grid>
+
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{Binding ConnectionSummary}" Foreground="Gray" FontSize="12" VerticalAlignment="Center" />
+                                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsPortLoading}" 
+                                             Width="80" Height="3" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Middle: Data Grid -->
+                    <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                            CornerRadius="8" Padding="5" BoxShadow="0 2 4 0 #20000000">
+                        <DataGrid ItemsSource="{Binding FilteredConnections}"
+                                  SelectedItem="{Binding SelectedConnection}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserResizeColumns="True"
+                                  CanUserSortColumns="True"
+                                  GridLinesVisibility="Horizontal"
+                                  BorderThickness="0"
+                                  RowHeight="30">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="协议" Binding="{Binding Protocol}" Width="60" />
+                                <DataGridTextColumn Header="本地地址" Binding="{Binding LocalAddress}" Width="180" />
+                                <DataGridTextColumn Header="远程地址" Binding="{Binding RemoteAddress}" Width="180" />
+                                <DataGridTemplateColumn Header="状态" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding State}" Foreground="{Binding StateColor}" 
+                                                       FontWeight="Medium" VerticalAlignment="Center" Margin="5,0" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="PID" Binding="{Binding ProcessId}" Width="60" />
+                                <DataGridTextColumn Header="进程名" Binding="{Binding ProcessName}" Width="150" />
+                                <DataGridTextColumn Header="进程路径" Binding="{Binding ProcessPath}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+
+                    <!-- Bottom: Actions -->
+                    <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                            CornerRadius="8" Padding="10" Margin="0,10,0,0" BoxShadow="0 2 4 0 #20000000"
+                            IsVisible="{Binding SelectedConnection, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding SelectedConnection.ProcessName, StringFormat='选中进程: {0}'}" 
+                                       FontWeight="Medium" VerticalAlignment="Center" Margin="0,0,15,0" />
+                            <Button Content="📂 打开文件位置" 
+                                    Command="{Binding OpenFileLocationCommand}"
+                                    CommandParameter="{Binding SelectedConnection}" />
+                            <Button Content="❌ 结束进程" Classes="danger"
+                                    Command="{Binding KillProcessCommand}"
+                                    CommandParameter="{Binding SelectedConnection}" />
+                            <TextBlock Text="⚠️ 结束系统进程可能导致系统不稳定" FontSize="11" Foreground="Orange" 
+                                       VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Diagnostic Footer -->
+        <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}" 
+                Padding="15,0" BorderBrush="#20000000" BorderThickness="0,1,0,0" VerticalAlignment="Stretch">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Text="📋 诊断日志路径:" VerticalAlignment="Center" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" FontSize="12" />
+                    <TextBox Text="{Binding LogPath}" IsReadOnly="True" Background="Transparent" BorderThickness="0" 
+                             VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource SystemControlForegroundAccentBrush}" />
+                </StackPanel>
+                <TextBlock Grid.Column="2" Text="(如加载异常，请发送此文件给开发者)" VerticalAlignment="Center" FontSize="11" 
+                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" FontStyle="Italic" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LinkSentry.Models;
 using LinkSentry.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LinkSentry.ViewModels;
 
@@ -23,10 +24,47 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
+    // ============================
+    //  Page Navigation
+    // ============================
+
+    [ObservableProperty]
+    private string _currentPage = "dashboard";
+
+    [ObservableProperty]
+    private SecurityViewModel? _securityViewModel;
+
+    [RelayCommand]
+    private void NavigateTo(string page)
+    {
+        // IMPORTANT: Create SecurityViewModel BEFORE setting CurrentPage.
+        // Setting CurrentPage triggers PropertyChanged → UpdatePage,
+        // which needs SecurityViewModel to already exist for correct DataContext.
+        if (page == "security" && SecurityViewModel == null)
+        {
+            SecurityViewModel = App.Services?.GetService<SecurityViewModel>();
+        }
+
+        CurrentPage = page;
+    }
+
     public MainViewModel(INetworkService networkService)
     {
         _networkService = networkService;
-        InitializeAsync().ConfigureAwait(false);
+        // Wrap in try-catch because fire-and-forget async can crash if unhandled
+        _ = SafeInitializeAsync();
+    }
+
+    private async Task SafeInitializeAsync()
+    {
+        try
+        {
+            await InitializeAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"InitializeAsync Error: {ex}");
+        }
     }
 
     private async Task InitializeAsync()
@@ -62,7 +100,17 @@ public partial class MainViewModel : ObservableObject
         {
             Interval = TimeSpan.FromSeconds(2)
         };
-        _timer.Tick += async (s, e) => await RefreshTrafficAsync();
+        _timer.Tick += async (s, e) =>
+        {
+            try
+            {
+                await RefreshTrafficAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RefreshTrafficAsync Error: {ex}");
+            }
+        };
         _timer.Start();
     }
 

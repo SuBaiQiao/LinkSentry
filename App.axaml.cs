@@ -27,8 +27,12 @@ namespace LinkSentry
                 builder.AddConsole();
             });
 
+            services.AddSingleton<IDiagnosticLogger, DiagnosticLogger>();
             services.AddSingleton<INetworkService, NetworkService>();
+            services.AddSingleton<IFirewallService, FirewallService>();
+            services.AddSingleton<IPortService, PortService>();
             services.AddTransient<MainViewModel>();
+            services.AddTransient<SecurityViewModel>();
 
             Services = services.BuildServiceProvider();
 

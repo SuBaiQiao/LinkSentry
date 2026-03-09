@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:LinkSentry.ViewModels"
+             xmlns:models="using:LinkSentry.Models"
+             xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="LinkSentry.Views.DashboardView"
+             x:DataType="vm:MainViewModel">
+
+    <UserControl.Resources>
+        <!-- Reusable template for network card -->
+        <DataTemplate x:Key="NetworkCardTemplate" DataType="models:NetworkInterfaceModel">
+            <Button Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).OpenDetailsCommand}"
+                    CommandParameter="{Binding}"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0"
+                    Margin="10">
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                        CornerRadius="8" 
+                        Padding="18" 
+                        Width="400"
+                        BoxShadow="0 4 8 0 #40000000">
+                    
+                    <StackPanel Spacing="8">
+                        <!-- Card Header -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="18" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"/>
+                            <Border Grid.Column="1" CornerRadius="4" Padding="6,2">
+                                <TextBlock Text="{Binding DisplayStatus}" FontSize="12" FontWeight="Bold" Foreground="{Binding StatusColor}" />
+                            </Border>
+                        </Grid>
+                        
+                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="Gray" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Description}"/>
+                        <Separator Margin="0,5" />
+                        
+                        <!-- IP/MAC Info -->
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,5" ShowGridLines="False">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="IPv4 地址:" Foreground="Gray" Margin="0,0,10,0"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                                <TextBlock Text="{Binding Ipv4Address}" FontWeight="Medium" VerticalAlignment="Center" />
+                                <Button Content="📋" Command="{Binding CopyIpv4Command}" 
+                                        FontSize="10" Padding="4,1" MinWidth="0" MinHeight="0"
+                                        VerticalAlignment="Center" ToolTip.Tip="复制 IPv4 地址"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" />
+                                <Border IsVisible="{Binding CopySuccess}" Background="#2000C853" CornerRadius="3" Padding="4,1">
+                                    <TextBlock Text="✓ 已复制" FontSize="10" Foreground="#00C853" VerticalAlignment="Center" />
+                                </Border>
+                            </StackPanel>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="IPv6 地址:" Foreground="Gray" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Ipv6Address}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="物理地址:" Foreground="Gray" Margin="0,0,10,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MacAddress}" FontWeight="Medium" />
+                        </Grid>
+                        
+                        <!-- Speed Info -->
+                        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" CornerRadius="4" Padding="10" Margin="0,10,0,0"
+                                IsVisible="{Binding IsChartVisible}">
+                            <StackPanel>
+                                <Grid ColumnDefinitions="*,*">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="↑ 上传速度" FontSize="12" Foreground="Gray" />
+                                        <TextBlock Text="{Binding SendSpeedKbps, StringFormat={}{0:F2} Kbps}" FontSize="14" FontWeight="Bold" Foreground="LimeGreen" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="↓ 下载速度" FontSize="12" Foreground="Gray" />
+                                        <TextBlock Text="{Binding ReceiveSpeedKbps, StringFormat={}{0:F2} Kbps}" FontSize="14" FontWeight="Bold" Foreground="DodgerBlue" />
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <!-- Mini traffic chart, only visible if connected -->
+                                <lvc:CartesianChart
+                                    IsVisible="{Binding IsChartVisible}"
+                                    Margin="0,15,0,0"
+                                    Height="100"
+                                    Series="{Binding TrafficSeries}"
+                                    XAxes="{Binding XAxes}"
+                                    YAxes="{Binding YAxes}"
+                                    TooltipPosition="Top">
+                                </lvc:CartesianChart>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ScrollViewer Padding="20">
+        <StackPanel Spacing="20" Margin="0,0,0,40">
+            <!-- Connected Interfaces -->
+            <TextBlock Text="已连接网络" FontSize="20" FontWeight="Bold" Foreground="LimeGreen" Margin="10,0,0,0"/>
+            <ItemsControl ItemsSource="{Binding ConnectedInterfaces}" ItemTemplate="{StaticResource NetworkCardTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <Separator Margin="10,10,10,10" />
+
+            <!-- Disconnected Interfaces -->
+            <TextBlock Text="已断开或休眠" FontSize="20" FontWeight="Bold" Foreground="Gray" Margin="10,0,0,0"/>
+            <ItemsControl ItemsSource="{Binding DisconnectedInterfaces}" ItemTemplate="{StaticResource NetworkCardTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
