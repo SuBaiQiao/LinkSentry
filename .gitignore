@@ -14,5 +14,6 @@ Thumbs.db
 
 ## Logs
 *.log
+*.txt
 build_output.txt
 build.log
