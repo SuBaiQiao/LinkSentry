@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:LinkSentry.Models"
+             xmlns:conv="using:LinkSentry.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="200"
+             x:Class="LinkSentry.Views.TrafficHeatmapView"
+             x:DataType="models:HeatmapDataPoint">
+    
+    <UserControl.Resources>
+        <conv:IntensityToColorConverter x:Key="IntensityConverter" />
+    </UserControl.Resources>
+
+    <StackPanel Spacing="10">
+        <TextBlock Text="流量历史热力图 (最近 7 天)" FontSize="14" FontWeight="SemiBold" Foreground="Gray" />
+        
+        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+            <!-- Hour Labels (Top) -->
+            <UniformGrid Grid.Row="0" Grid.Column="1" Columns="24" Margin="0,0,0,5">
+                <TextBlock Text="00" FontSize="9" Foreground="Gray" HorizontalAlignment="Left" />
+                <Control /> <Control /> <Control /> <Control /> <Control />
+                <TextBlock Text="06" FontSize="9" Foreground="Gray" HorizontalAlignment="Left" />
+                <Control /> <Control /> <Control /> <Control /> <Control />
+                <TextBlock Text="12" FontSize="9" Foreground="Gray" HorizontalAlignment="Left" />
+                <Control /> <Control /> <Control /> <Control /> <Control />
+                <TextBlock Text="18" FontSize="9" Foreground="Gray" HorizontalAlignment="Left" />
+                <Control /> <Control /> <Control /> <Control /> <Control />
+            </UniformGrid>
+
+            <!-- Grid Content -->
+            <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Auto">
+                <ItemsControl Name="HeatmapItems">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="24" Rows="7" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:HeatmapDataPoint">
+                            <Border Margin="2" CornerRadius="3" Height="15" Width="15"
+                                    Background="{Binding IntensityLevel, Converter={StaticResource IntensityConverter}}"
+                                    Cursor="Hand">
+                                <ToolTip.Tip>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding Time, StringFormat={}{0:yyyy年MM月dd日 HH:00}}" FontWeight="Bold" />
+                                        <Separator />
+                                        <TextBlock Text="{Binding AvgDownload, StringFormat='平均下载: {0:F1} B/s'}" />
+                                        <TextBlock Text="{Binding AvgUpload, StringFormat='平均上传: {0:F1} B/s'}" />
+                                        <TextBlock Text="{Binding MaxDownload, StringFormat='最大下载: {0:F1} B/s'}" />
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Legend -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,5,0,0">
+            <TextBlock Text="低" FontSize="10" VerticalAlignment="Center" Foreground="Gray" />
+            <Border Width="12" Height="12" CornerRadius="2" Background="#20808080" />
+            <Border Width="12" Height="12" CornerRadius="2" Background="#4000C853" />
+            <Border Width="12" Height="12" CornerRadius="2" Background="#8000C853" />
+            <Border Width="12" Height="12" CornerRadius="2" Background="#FF00C853" />
+            <Border Width="12" Height="12" CornerRadius="2" Background="#FFFFD600" />
+            <Border Width="12" Height="12" CornerRadius="2" Background="#FFFF3D00" />
+            <TextBlock Text="高" FontSize="10" VerticalAlignment="Center" Foreground="Gray" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

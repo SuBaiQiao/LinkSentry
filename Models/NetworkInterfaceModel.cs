@@ -138,7 +138,6 @@ public partial class NetworkInterfaceModel : ObservableObject
             new Axis 
             { 
                  IsVisible = true,
-                 Name = "Kbps",
                  NameTextSize = 10,
                  TextSize = 10,
                  LabelsPaint = new SolidColorPaint(SKColors.Gray),

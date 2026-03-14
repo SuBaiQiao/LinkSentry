@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:LinkSentry.Models"
+             xmlns:vm="using:LinkSentry.ViewModels"
+             xmlns:conv="using:LinkSentry.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="250"
+             x:Class="LinkSentry.Views.LongTermHeatmapView"
+             x:DataType="vm:DetailViewModel">
+
+    <UserControl.Resources>
+        <conv:IntensityToColorConverter x:Key="IntensityConverter" />
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+            CornerRadius="8" Padding="15" BoxShadow="0 2 6 0 #30000000">
+        <StackPanel Spacing="15">
+            <!-- Summary Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Text="{Binding TotalTrafficSummary}" FontSize="16" FontWeight="Bold" />
+                    <TextBlock Text="{Binding MostActiveDayInfo}" FontSize="12" Foreground="Gray" />
+                    <!-- Removed days of week labels as requested -->
+                </StackPanel>
+            </Grid>
+
+            <!-- 13 Weeks Grid -->
+            <Grid ColumnDefinitions="Auto,*">
+                <!-- Month Labels -->
+                <UniformGrid Grid.Column="1" Columns="13" Margin="0,0,0,5">
+                    <TextBlock Text="{Binding Month1Label}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" />
+                    <Control /> <Control /> <Control />
+                    <TextBlock Text="{Binding Month2Label}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" />
+                    <Control /> <Control /> <Control />
+                    <TextBlock Text="{Binding Month3Label}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" />
+                </UniformGrid>
+
+                <!-- Grid -->
+                <ItemsControl Grid.Row="1" Grid.Column="1" ItemsSource="{Binding LongTermHeatmapData}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <!-- 13 weeks * 7 days -->
+                            <UniformGrid Columns="13" Rows="7" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:HeatmapDataPoint">
+                            <Border Margin="1.5" CornerRadius="2" Height="14" Width="14"
+                                    Background="{Binding IntensityLevel, Converter={StaticResource IntensityConverter}}"
+                                    Cursor="Hand">
+                                <ToolTip.Tip>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{Binding Time, StringFormat={}{0:yyyy年MM月dd日}}" FontWeight="Bold" />
+                                        <Separator />
+                                        <TextBlock Text="{Binding FormattedTotalDownload, StringFormat='⬇ 下载总量: {0}'}" />
+                                        <TextBlock Text="{Binding FormattedTotalUpload, StringFormat='⬆ 上传总量: {0}'}" />
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+            <!-- Legend -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <TextBlock Text="少" FontSize="10" VerticalAlignment="Center" Foreground="Gray" />
+                <Border Width="10" Height="10" CornerRadius="1" Background="#20808080" ToolTip.Tip="无数据" />
+                <Border Width="10" Height="10" CornerRadius="1" Background="#4000C853" ToolTip.Tip="> 0MB" />
+                <Border Width="10" Height="10" CornerRadius="1" Background="#8000C853" ToolTip.Tip="> 1GB" />
+                <Border Width="10" Height="10" CornerRadius="1" Background="#FF00C853" ToolTip.Tip="> 5GB" />
+                <Border Width="10" Height="10" CornerRadius="1" Background="#FFFFD600" ToolTip.Tip="> 10GB" />
+                <Border Width="10" Height="10" CornerRadius="1" Background="#FFFF3D00" ToolTip.Tip="> 50GB" />
+                <TextBlock Text="多" FontSize="10" VerticalAlignment="Center" Foreground="Gray" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

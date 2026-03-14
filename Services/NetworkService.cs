@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LinkSentry.Services;
 
-public class NetworkService(ILogger<NetworkService> logger) : INetworkService
+public class NetworkService(ILogger<NetworkService> logger, ITrafficHistoryService trafficHistory) : INetworkService
 {
     private readonly Dictionary<string, (long bytesSent, long bytesReceived, DateTime timestamp)> _previousStats = [];
 
@@ -99,8 +99,14 @@ public class NetworkService(ILogger<NetworkService> logger) : INetworkService
                         var timeDiff = (now - prev.timestamp).TotalSeconds;
                         if (timeDiff > 0)
                         {
-                            model.SendSpeedKbps = ((ipStats.BytesSent - prev.bytesSent) * 8.0 / 1024.0) / timeDiff;
-                            model.ReceiveSpeedKbps = ((ipStats.BytesReceived - prev.bytesReceived) * 8.0 / 1024.0) / timeDiff;
+                            var sentSpeed = (long)((ipStats.BytesSent - prev.bytesSent) / timeDiff);
+                            var recvSpeed = (long)((ipStats.BytesReceived - prev.bytesReceived) / timeDiff);
+
+                            model.SendSpeedKbps = (sentSpeed * 8.0) / 1024.0;
+                            model.ReceiveSpeedKbps = (recvSpeed * 8.0) / 1024.0;
+
+                            // Record to SQLite
+                            _ = trafficHistory.RecordAsync(ni.Name, sentSpeed, recvSpeed, ipStats.BytesSent, ipStats.BytesReceived);
                         }
                     }
 
@@ -124,8 +130,6 @@ public class NetworkService(ILogger<NetworkService> logger) : INetworkService
                         cleanMax = Math.Max(100, cleanMax);
 
                         model.YAxes[0].MaxLimit = cleanMax;
-                        // By forcing MinStep to cleanMax, LiveCharts will only draw labels for 0 and cleanMax.
-                        // This prevents the issue where the top bound label gets hidden due to lack of space.
                         model.YAxes[0].MinStep = cleanMax;
                     });
 

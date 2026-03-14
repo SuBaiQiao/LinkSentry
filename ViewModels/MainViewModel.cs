@@ -13,6 +13,7 @@ namespace LinkSentry.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly INetworkService _networkService;
+    private readonly ITrafficHistoryService _historyService;
     private DispatcherTimer? _timer;
 
     public ObservableCollection<NetworkInterfaceModel> ConnectedInterfaces { get; } = new();
@@ -48,9 +49,10 @@ public partial class MainViewModel : ObservableObject
         CurrentPage = page;
     }
 
-    public MainViewModel(INetworkService networkService)
+    public MainViewModel(INetworkService networkService, ITrafficHistoryService historyService)
     {
         _networkService = networkService;
+        _historyService = historyService;
         // Wrap in try-catch because fire-and-forget async can crash if unhandled
         _ = SafeInitializeAsync();
     }
@@ -149,7 +151,7 @@ public partial class MainViewModel : ObservableObject
         if (interfaceModel == null) return;
         
         var detailsWindow = new LinkSentry.Views.DetailWindow();
-        var detailsViewModel = new DetailViewModel(_networkService, interfaceModel);
+        var detailsViewModel = new DetailViewModel(_networkService, _historyService, interfaceModel);
         detailsWindow.DataContext = detailsViewModel;
 
         // Optionally, make it a true dialog. We'll show it non-modal for now so they can see multiple interfaces.

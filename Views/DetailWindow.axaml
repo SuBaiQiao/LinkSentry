@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:LinkSentry.ViewModels"
+        xmlns:views="using:LinkSentry.Views"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="750"
         Width="1200" Height="750"
@@ -100,7 +101,7 @@
 
             <!-- Right: Chart Panel -->
             <Border Grid.Column="1" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="8" Padding="15" BoxShadow="0 2 6 0 #30000000">
-                <Grid RowDefinitions="Auto,Auto,*">
+                <Grid RowDefinitions="Auto,Auto,*,Auto">
                     <TextBlock Grid.Row="0" Text="实时流量监控" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10" />
                     
                     <!-- Speed display -->
@@ -116,13 +117,22 @@
                     </Grid>
                     
                     <!-- Chart -->
-                    <lvc:CartesianChart
-                        Grid.Row="2"
-                        Series="{Binding NetworkInterface.TrafficSeries}"
-                        XAxes="{Binding NetworkInterface.XAxes}"
-                        YAxes="{Binding NetworkInterface.YAxes}"
-                        TooltipPosition="Top">
-                    </lvc:CartesianChart>
+                    <Grid Grid.Row="2" Margin="0,15,0,0" RowDefinitions="Auto,*">
+                        <TextBlock Grid.Row="0" Text="Kbps" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" />
+                        <lvc:CartesianChart
+                            Grid.Row="1"
+                            Series="{Binding NetworkInterface.TrafficSeries}"
+                            XAxes="{Binding NetworkInterface.XAxes}"
+                            YAxes="{Binding NetworkInterface.YAxes}"
+                            Height="200"
+                            TooltipPosition="Top">
+                        </lvc:CartesianChart>
+                    </Grid>
+
+                    <!-- Long-term Heatmap & Summary -->
+                    <views:LongTermHeatmapView 
+                        Grid.Row="3" 
+                        Margin="0,20,0,0" />
                 </Grid>
             </Border>
         </Grid>

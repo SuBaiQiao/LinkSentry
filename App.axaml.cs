@@ -28,6 +28,8 @@ namespace LinkSentry
             });
 
             services.AddSingleton<IDiagnosticLogger, DiagnosticLogger>();
+            services.AddSingleton<SqliteDbFactory>();
+            services.AddSingleton<ITrafficHistoryService, TrafficHistoryService>();
             services.AddSingleton<INetworkService, NetworkService>();
             services.AddSingleton<IFirewallService, FirewallService>();
             services.AddSingleton<IPortService, PortService>();
@@ -35,6 +37,9 @@ namespace LinkSentry
             services.AddTransient<SecurityViewModel>();
 
             Services = services.BuildServiceProvider();
+
+            // Initialize SQLite DB
+            Services.GetRequiredService<SqliteDbFactory>().Initialize();
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {

@@ -32,6 +32,11 @@
 
 ### 详情页
 - 左右分栏布局：左侧展示详细网络信息，右侧展示大尺寸实时流量图
+- **历史流量分析 (🆕 新增)**：
+  - 内置 **SQLite** 数据库存储长期网卡流量数据
+  - 支持类似 **GitHub 提交树 (Contribution Graph)** 的 **3个月 (90天) 历史流量热力图**
+  - 自动汇总 3 个月总流量与最活跃的一天，悬停查看详尽的每日下载/上传量
+  - 后台自动轮询刷新与旧数据淘汰清理机制
 - 快捷操作：启用/禁用网卡、更新 DHCP、刷新 DNS 缓存
 
 ### 安全与端口
@@ -93,6 +98,7 @@ LinkSentry/
 | **主题** | Avalonia.Themes.Fluent | 11.3.11 |
 | **MVVM 工具包** | CommunityToolkit.Mvvm | 8.4.0 |
 | **图表库** | LiveChartsCore.SkiaSharpView.Avalonia | 2.0.0-rc6.1 |
+| **本地数据库** | Microsoft.Data.Sqlite | 8.0.2 |
 | **依赖注入** | Microsoft.Extensions.DependencyInjection | 10.0.3 |
 | **日志** | Microsoft.Extensions.Logging.Console | 10.0.3 |
 | **网络 API** | System.Net.NetworkInformation | 内置 |
@@ -147,6 +153,7 @@ dotnet publish -c Release -r linux-x64 --self-contained
 - [x] 🔪 **进程管理**：支持查找程序位置与强制终止可疑进程
 - [x] ⚡ **高性能 UI**：端口列表使用 DataGrid 虚拟化加载，支持大规模连接展示
 - [x] 🎨 **视图切换**：侧边栏图标导航，Dashboard 与 Security 模块平滑切换
+- [x] 📊 **历史流量统计**：引入 SQLite 本地数据库，支持 90 天网络流量热力图 (GitHub Style) 统计与展示
 
 ---
 

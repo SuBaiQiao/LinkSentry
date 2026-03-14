@@ -73,15 +73,17 @@
                                 </Grid>
                                 
                                 <!-- Mini traffic chart, only visible if connected -->
-                                <lvc:CartesianChart
-                                    IsVisible="{Binding IsChartVisible}"
-                                    Margin="0,15,0,0"
-                                    Height="100"
-                                    Series="{Binding TrafficSeries}"
-                                    XAxes="{Binding XAxes}"
-                                    YAxes="{Binding YAxes}"
-                                    TooltipPosition="Top">
-                                </lvc:CartesianChart>
+                                <Grid IsVisible="{Binding IsChartVisible}" Margin="0,15,0,0" RowDefinitions="Auto,*">
+                                    <TextBlock Grid.Row="0" Text="Kbps" FontSize="10" Foreground="Gray" HorizontalAlignment="Left" Margin="4,0,0,2" />
+                                    <lvc:CartesianChart
+                                        Grid.Row="1"
+                                        Height="100"
+                                        Series="{Binding TrafficSeries}"
+                                        XAxes="{Binding XAxes}"
+                                        YAxes="{Binding YAxes}"
+                                        TooltipPosition="Top">
+                                    </lvc:CartesianChart>
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
